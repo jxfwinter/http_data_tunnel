@@ -75,7 +75,7 @@ void HttpDataTunnelServer::start()
         return;
     }
 
-    loop_http_accept({});
+    loop_accept({});
 }
 
 void HttpDataTunnelServer::stop()
@@ -103,14 +103,14 @@ void HttpDataTunnelServer::continue_session(TunnelSessionInfoPtr join_ses, Tunne
 }
 
 #include <boost/asio/yield.hpp>
-void HttpDataTunnelServer::loop_http_accept(BSErrorCode ec)
+void HttpDataTunnelServer::loop_accept(BSErrorCode ec)
 {
     reenter(m_http_accept_co)
     {
         for(;;)
         {
             yield m_http_acceptor.async_accept(m_http_socket, [this](BSErrorCode ec) {
-                this->loop_http_accept(ec);
+                this->loop_accept(ec);
             });
             if(ec == boost::asio::error::no_descriptors)
             {
@@ -415,15 +415,6 @@ void HttpDataTunnelServer::loop_transfer_data(BSErrorCode ec, TunnelSessionInfoP
 }
 
 #include <boost/asio/unyield.hpp>
-
-void HttpDataTunnelServer::set_response(const StringRequest& req, http::status s, StringResponse& res)
-{
-    res.result(s);
-    res.version(req.version());
-    res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
-    res.keep_alive(req.keep_alive());
-    res.content_length(0);
-}
 
 void HttpDataTunnelServer::add_session(TunnelSessionInfoPtr session)
 {

@@ -49,7 +49,7 @@ static void set_socket_opt(TcpSocket& socket)
 }
 
 HttpDataTunnelClient::HttpDataTunnelClient(IoContext& ioc) :
-    m_ioc(ioc), m_timer(m_ioc), m_socket(m_ioc)
+    m_ioc(ioc), m_socket(m_ioc), m_resolver(m_ioc), m_to_socket(m_ioc)
 {
 
 }
@@ -159,7 +159,7 @@ void HttpDataTunnelClient::loop_run(boost::system::error_code ec)
             m_cb(ec);
             return;
         }
-        m_req_sr = ReqSerializer(m_req_parser.get());
+        m_req_sr.reset(new ReqSerializer(m_req_parser.get()));
         for(;;)
         {
             if(m_req_parser.is_done())
@@ -169,7 +169,7 @@ void HttpDataTunnelClient::loop_run(boost::system::error_code ec)
                     req.body().data = nullptr;
                     req.body().more = false;
                 }
-                yield http::async_write(m_to_socket, m_req_sr,
+                yield http::async_write(m_to_socket, *m_req_sr,
                                         [self, this](boost::system::error_code ec, std::size_t) {
                     this->loop_run(ec);
                 });
@@ -198,11 +198,11 @@ void HttpDataTunnelClient::loop_run(boost::system::error_code ec)
                 }
                 {
                     auto& req = m_req_parser.get();
-                    m_body_buffer.resize(co_info->recv_body_buf.size() - req.body().size);
+                    m_body_buffer.resize(m_body_buffer.size() - req.body().size);
                     req.body().size = m_body_buffer.size();
                     req.body().more = true;
                 }
-                yield http::async_write(m_to_socket, m_req_sr,
+                yield http::async_write(m_to_socket, *m_req_sr,
                                         [self, this](boost::system::error_code ec, std::size_t) {
                     this->loop_run(ec);
                 });
@@ -229,7 +229,7 @@ void HttpDataTunnelClient::loop_run(boost::system::error_code ec)
             return;
         }
         //转发http响应
-        m_res_sr = ResSerializer(m_res_parser.get());
+        m_res_sr.reset(new ResSerializer(m_res_parser.get()));
         for(;;)
         {
             if(m_res_parser.is_done())
@@ -239,7 +239,7 @@ void HttpDataTunnelClient::loop_run(boost::system::error_code ec)
                     res.body().data = nullptr;
                     res.body().more = false;
                 }
-                yield http::async_write(m_socket, m_res_sr,
+                yield http::async_write(m_socket, *m_res_sr,
                                         [self, this](boost::system::error_code ec, std::size_t) {
                     this->loop_run(ec);
                 });
@@ -272,7 +272,7 @@ void HttpDataTunnelClient::loop_run(boost::system::error_code ec)
                     res.body().size = m_body_buffer.size();
                     res.body().more = true;
                 }
-                yield http::async_write(m_socket, m_res_sr,
+                yield http::async_write(m_socket, *m_res_sr,
                                         [self, this](boost::system::error_code ec, std::size_t) {
                     this->loop_run(ec);
                 });

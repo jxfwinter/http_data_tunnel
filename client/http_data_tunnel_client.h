@@ -72,8 +72,8 @@ private:
 
     ReqParser m_req_parser;
     ResParser m_res_parser;
-    ReqSerializer m_req_sr;
-    ResSerializer m_res_sr;
+    std::unique_ptr<ReqSerializer> m_req_sr;
+    std::unique_ptr<ResSerializer> m_res_sr;
     vector<char> m_body_buffer;
 };
 

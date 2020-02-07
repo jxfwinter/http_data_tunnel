@@ -19,7 +19,7 @@ executable("http_data_tunnel_server") {
         "./server/logger.cpp",
         "./server/logger.h",
         ]
-    libs = [boost_log_setup", "boost_log", "boost_date_time", "boost_filesystem", ", "boost_thread",
+    libs = ["boost_log_setup", "boost_log", "boost_date_time", "boost_filesystem", "boost_thread",
             "boost_program_options", "boost_regex", "pthread"]
 }
 
@@ -29,8 +29,8 @@ executable("http_data_tunnel_client") {
 
     sources = [
         "./client/main_http.cpp",
-        "./server/http_data_tunnel_client.h",
-        "./server/http_data_tunnel_client.cpp",
+        "./client/http_data_tunnel_client.h",
+        "./client/http_data_tunnel_client.cpp",
         ]
     libs = ["pthread"]
 }

@@ -25,7 +25,7 @@ bool init_params(int argc, char** argv, ConfigParams& params)
         po::options_description cmdline_options("Generic options");
         cmdline_options.add_options()
                 ("help,h", "produce help message")
-                ("config,c", po::value<string>(&config_file)->default_value("../config/http_rrproxy.cfg"));
+                ("config,c", po::value<string>(&config_file)->default_value("../config/http_data_tunnel.cfg"));
 
         po::options_description config_file_options("configure file options");
         config_file_options.add_options()
@@ -34,7 +34,6 @@ bool init_params(int argc, char** argv, ConfigParams& params)
 
                 ("thread_pool", po::value<uint16_t>(), "thread pool")
 
-                ("req_timeout_secs", po::value<uint16_t>(), "request timeout seconds")
                 ("log_path", po::value<string>(), "log file path")
                 ("log_level", po::value<string>(), "log level:trace debug info warning error fatal");
 
@@ -64,8 +63,6 @@ bool init_params(int argc, char** argv, ConfigParams& params)
         params.http_listen_port = vm["http_listen_port"].as<uint16_t>();
 
         params.thread_pool = vm["thread_pool"].as<uint16_t>();
-
-        params.req_timeout_secs = vm["req_timeout_secs"].as<uint16_t>();
 
         params.log_path = vm["log_path"].as<string>();
 

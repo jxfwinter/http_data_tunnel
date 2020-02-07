@@ -13,7 +13,7 @@ int main(int argc,char ** argv)
         std::cerr <<
                      "Usage: " << argv[0] << " <host> <port> <session_id> <local_port> <count>\n" <<
                      "Example:\n    " << argv[0] <<
-                     " 121.199.4.198 28080 test1122 3080 100\n";
+                     " 121.199.4.198 28080 test-tunnel 3080 2\n";
         return EXIT_FAILURE;
     }
 
@@ -37,7 +37,7 @@ int main(int argc,char ** argv)
 
         HttpDataTunnelClientPtr ht(new HttpDataTunnelClient(*ioc_pool[i%thread_pool]));
         ht->async_run(host, port, session_id_tmp, "127.0.0.1", local_port, [session_id_tmp](boost::system::error_code ec){
-            std::cout << "session_id:" << session_id_tmp << "," ec.message() << "\n";
+            std::cout << "session_id:" << session_id_tmp << "," << ec.message() << "\n";
         });
     }
 

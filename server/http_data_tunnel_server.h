@@ -47,6 +47,8 @@ public:
     TunnelSessionInfoPtr find_session(const string& session_id);
 
 private:
+    void loop_accept(BSErrorCode ec);
+
     void start_session(TcpSocket s);
     void loop_session(BSErrorCode ec, TunnelSessionInfoPtr co_info);
 
