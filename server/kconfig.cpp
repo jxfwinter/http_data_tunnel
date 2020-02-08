@@ -32,6 +32,8 @@ bool init_params(int argc, char** argv, ConfigParams& params)
                 ("http_listen_addr", po::value<string>(), "http listen address")
                 ("http_listen_port", po::value<uint16_t>(), "http listen port")
 
+                ("body_limit", po::value<uint64_t>(), "http body size max size")
+
                 ("thread_pool", po::value<uint16_t>(), "thread pool")
 
                 ("log_path", po::value<string>(), "log file path")
@@ -61,6 +63,9 @@ bool init_params(int argc, char** argv, ConfigParams& params)
 
         params.http_listen_addr = vm["http_listen_addr"].as<string>();
         params.http_listen_port = vm["http_listen_port"].as<uint16_t>();
+
+        params.body_limit = vm["body_limit"].as<uint64_t>();
+        params.body_limit *= 1024*1024;
 
         params.thread_pool = vm["thread_pool"].as<uint16_t>();
 

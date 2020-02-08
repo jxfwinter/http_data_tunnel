@@ -132,6 +132,7 @@ void HttpDataTunnelServer::loop_session(BSErrorCode ec, TunnelSessionInfoPtr co_
     reenter(co_info->co)
     {
         co_info->req_parser.reset(new ReqParser());
+        co_info->req_parser->body_limit(g_cfg->body_limit);
         yield http::async_read_header(co_info->tmp_socket, co_info->buffer, *(co_info->req_parser),
                                       [co_info, this](const BSErrorCode& ec, std::size_t) {
             this->loop_session(ec, co_info);
@@ -156,36 +157,28 @@ void HttpDataTunnelServer::loop_session(BSErrorCode ec, TunnelSessionInfoPtr co_
             if(co_info->session_id.empty())
             {
                 log_error_ext("not has session id");
-                yield
-                {
-                    StrResponse res;
-                    res.result(http::status::bad_request);
-                    res.keep_alive(false);
-                    res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
-                    res.content_length(0);
-                    LogDebug << res;
-                    http::async_write(co_info->tunnel_socket, res,
-                                      [co_info, this](const BSErrorCode& ec, std::size_t) {
-                        this->loop_session(ec, co_info);
-                    });
-                }
+                co_info->res.result(http::status::bad_request);
+                co_info->res.keep_alive(false);
+                co_info->res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
+                co_info->res.content_length(0);
+                LogDebug << co_info->res;
+                yield http::async_write(co_info->tunnel_socket, co_info->res,
+                                        [co_info, this](const BSErrorCode& ec, std::size_t) {
+                    this->loop_session(ec, co_info);
+                });
                 return;
             }
             LogDebug << "connect:" << co_info->session_id;
-            yield
-            {
-                StrResponse res;
-                res.result(http::status::ok);
-                res.version(11);
-                res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
-                res.content_length(0);
-                res.keep_alive(false);
-                LogDebug << res;
-                http::async_write(co_info->tunnel_socket, res,
-                                  [co_info, this](const BSErrorCode& ec, std::size_t) {
-                    this->loop_session(ec, co_info);
-                });
-            }
+            co_info->res.result(http::status::ok);
+            co_info->res.version(11);
+            co_info->res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
+            co_info->res.content_length(0);
+            co_info->res.keep_alive(false);
+            LogDebug <<  co_info->session_id << "\n" << co_info->res;
+            yield http::async_write(co_info->tunnel_socket, co_info->res,
+                              [co_info, this](const BSErrorCode& ec, std::size_t) {
+                this->loop_session(ec, co_info);
+            });
             if(ec)
             {
                 log_warning_ext("loop_session failed, %1%", ec.message());
@@ -213,45 +206,36 @@ void HttpDataTunnelServer::loop_session(BSErrorCode ec, TunnelSessionInfoPtr co_
             if(co_info->session_id.empty())
             {
                 LogErrorExt << "not has session id";
-                yield
-                {
-                    StrResponse res;
-                    res.result(http::status::bad_request);
-                    res.keep_alive(false);
-                    res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
-                    res.content_length(0);
-                    LogDebug << res;
-                    http::async_write(co_info->tmp_socket, res,
-                                      [co_info, this](const BSErrorCode& ec, std::size_t) {
-                        this->loop_session(ec, co_info);
-                    });
-                }
+                co_info->res.result(http::status::bad_request);
+                co_info->res.keep_alive(false);
+                co_info->res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
+                co_info->res.content_length(0);
+                LogDebug << co_info->res;
+                yield http::async_write(co_info->tmp_socket, co_info->res,
+                                        [co_info, this](const BSErrorCode& ec, std::size_t) {
+                    this->loop_session(ec, co_info);
+                });
                 return;
             }
             while(1)
             {
-                co_info->find_ses = find_session(co_info->session_id);
+                co_info->find_ses = find_and_remove_session(co_info->session_id);
                 if(!co_info->find_ses)
                 {
-                    LogWarn << "not has session id:" << co_info->session_id;
                     //最多等待1秒
                     co_info->already_wait += 20;
                     if(co_info->already_wait > 1000)
                     {
                         LogErrorExt << "not has session id:" << co_info->session_id;
-                        yield
-                        {
-                            StrResponse res;
-                            res.result(http::status::not_found);
-                            res.keep_alive(false);
-                            res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
-                            res.content_length(0);
-                            LogDebug << res;
-                            http::async_write(co_info->tmp_socket, res,
-                                              [co_info, this](const BSErrorCode& ec, std::size_t) {
-                                this->loop_session(ec, co_info);
-                            });
-                        }
+                        co_info->res.result(http::status::not_found);
+                        co_info->res.keep_alive(false);
+                        co_info->res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
+                        co_info->res.content_length(0);
+                        LogDebug << co_info->res;
+                        yield http::async_write(co_info->tmp_socket, co_info->res,
+                                                [co_info, this](const BSErrorCode& ec, std::size_t) {
+                            this->loop_session(ec, co_info);
+                        });
                         return;
                     }
                     else
@@ -267,7 +251,6 @@ void HttpDataTunnelServer::loop_session(BSErrorCode ec, TunnelSessionInfoPtr co_
                 {
                     //找到关联的session
                     co_info->http_socket = std::move(co_info->tmp_socket);
-                    remove_session(co_info->session_id, co_info->find_ses);
                     break;
                 }
             }
@@ -343,6 +326,7 @@ void HttpDataTunnelServer::loop_transfer_data(BSErrorCode ec, TunnelSessionInfoP
 
         //读取http响应头
         co_info->res_parser.reset(new ResParser());
+        co_info->res_parser->body_limit(g_cfg->body_limit);
         yield http::async_read_header(co_info->tunnel_socket, co_info->buffer, *(co_info->res_parser),
                                       [co_info, this](const BSErrorCode& ec, std::size_t) {
             this->loop_transfer_data(ec, co_info);
@@ -422,22 +406,22 @@ void HttpDataTunnelServer::add_session(TunnelSessionInfoPtr session)
     auto session_it = m_tmp_tunnel_sessions.find(session->session_id);
     if(session_it != m_tmp_tunnel_sessions.end())
     {
-        LogErrorExt << "already has session:" << session->session_id;
-        return;
+        LogWarn << "already has session:" << session->session_id;
     }
     m_tmp_tunnel_sessions[session->session_id] = session;
 }
 
-TunnelSessionInfoPtr HttpDataTunnelServer::find_session(const string& session_id)
+TunnelSessionInfoPtr HttpDataTunnelServer::find_and_remove_session(const string& session_id)
 {
     std::lock_guard<std::mutex> lk(m_mutex);
     auto session_it = m_tmp_tunnel_sessions.find(session_id);
     if(session_it == m_tmp_tunnel_sessions.end())
     {
-        log_error_ext("find_session,not find session:%1%", session_id);
         return nullptr;
     }
-    return session_it->second;
+    auto res = session_it->second;
+    m_tmp_tunnel_sessions.erase(session_it);
+    return res;
 }
 
 void HttpDataTunnelServer::remove_session(const string& session_id, TunnelSessionInfoPtr session)
@@ -452,5 +436,6 @@ void HttpDataTunnelServer::remove_session(const string& session_id, TunnelSessio
     {
         return;
     }
+    LogWarn << "remove session:" << session_id;
     m_tmp_tunnel_sessions.erase(session_it);
 }

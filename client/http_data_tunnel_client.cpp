@@ -5,16 +5,6 @@
 #include <boost/asio/write.hpp>
 #include <iostream>
 
-#define KK_PRT(fmt...)   \
-    do {\
-    time_t timep;\
-    time(&timep);\
-    tm* tt = localtime(&timep); \
-    printf("[%d-%02d-%02d %02d:%02d:%02d][%s]-%d: ", tt->tm_year+1900,tt->tm_mon+1,tt->tm_mday,tt->tm_hour,tt->tm_min,tt->tm_sec, __FUNCTION__, __LINE__);\
-    printf(fmt);\
-    printf("\n");\
-    }while(0)
-
 static void set_socket_opt(TcpSocket& socket)
 {
     //boost::asio::socket_base::keep_alive opt_keep_alive(true);
@@ -51,7 +41,9 @@ static void set_socket_opt(TcpSocket& socket)
 HttpDataTunnelClient::HttpDataTunnelClient(IoContext& ioc) :
     m_ioc(ioc), m_socket(m_ioc), m_resolver(m_ioc), m_to_socket(m_ioc)
 {
-
+    //最大200M
+    m_req_parser.body_limit(1024*1024*200);
+    m_res_parser.body_limit(1024*1024*200);
 }
 
 HttpDataTunnelClient::~HttpDataTunnelClient()
@@ -181,7 +173,7 @@ void HttpDataTunnelClient::loop_run(boost::system::error_code ec)
                     m_body_buffer.resize(1024);
                     auto& req = m_req_parser.get();
                     req.body().data = m_body_buffer.data();
-                    req.body().more = m_body_buffer.size();
+                    req.body().size = m_body_buffer.size();
                 }
                 yield http::async_read(m_socket, m_read_buffer, m_req_parser,
                                        [self, this](boost::system::error_code ec, std::size_t) {

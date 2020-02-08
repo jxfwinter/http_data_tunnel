@@ -63,6 +63,7 @@ struct ConfigParams
 {
     string http_listen_addr = "0.0.0.0";
     uint16_t http_listen_port = 3080;
+    uint64_t body_limit;
 
     uint16_t thread_pool = 3;
 

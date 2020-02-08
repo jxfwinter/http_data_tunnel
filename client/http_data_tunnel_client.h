@@ -33,7 +33,18 @@ typedef std::function<void (boost::system::error_code ec)> RunCallback;
 class HttpDataTunnelClient;
 typedef std::shared_ptr<HttpDataTunnelClient> HttpDataTunnelClientPtr;
 
-class HttpDataTunnelClient : std::enable_shared_from_this<HttpDataTunnelClient>
+
+#define KK_PRT(fmt...)   \
+    do {\
+    time_t timep;\
+    time(&timep);\
+    tm* tt = localtime(&timep); \
+    printf("[%d-%02d-%02d %02d:%02d:%02d][%s]-%d: ", tt->tm_year+1900,tt->tm_mon+1,tt->tm_mday,tt->tm_hour,tt->tm_min,tt->tm_sec, __FUNCTION__, __LINE__);\
+    printf(fmt);\
+    printf("\n");\
+    }while(0)
+
+class HttpDataTunnelClient : public std::enable_shared_from_this<HttpDataTunnelClient>
 {
 public:
     HttpDataTunnelClient(IoContext& ioc);

@@ -19,7 +19,7 @@ struct TunnelSessionInfo
     boost::beast::flat_buffer buffer;
     vector<char> recv_body_buf; //用来接收body的buffer
     //StrRequest req;
-    //StrResponse res;
+    StrResponse res;
     string session_id;
     STimer timer;
     int already_wait = 0; //已等待毫秒
@@ -44,7 +44,7 @@ public:
     //删除session
     void remove_session(const string& session_id, TunnelSessionInfoPtr session);
 
-    TunnelSessionInfoPtr find_session(const string& session_id);
+    TunnelSessionInfoPtr find_and_remove_session(const string& session_id);
 
 private:
     void loop_accept(BSErrorCode ec);
