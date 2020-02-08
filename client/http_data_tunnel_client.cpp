@@ -82,6 +82,7 @@ void HttpDataTunnelClient::loop_run(boost::system::error_code ec)
         });
         if(ec)
         {
+            KK_PRT("session_id:%s, err:%s", m_session_id.c_str(), ec.message().c_str());
             m_cb(ec);
             return;
         }
@@ -95,6 +96,7 @@ void HttpDataTunnelClient::loop_run(boost::system::error_code ec)
         }
         if(ec)
         {
+            KK_PRT("session_id:%s, err:%s", m_session_id.c_str(), ec.message().c_str());
             m_cb(ec);
             return;
         }
@@ -113,6 +115,7 @@ void HttpDataTunnelClient::loop_run(boost::system::error_code ec)
         });
         if(ec)
         {
+            KK_PRT("session_id:%s, err:%s", m_session_id.c_str(), ec.message().c_str());
             m_cb(ec);
             return;
         }
@@ -121,6 +124,7 @@ void HttpDataTunnelClient::loop_run(boost::system::error_code ec)
         });
         if(ec)
         {
+            KK_PRT("session_id:%s, err:%s", m_session_id.c_str(), ec.message().c_str());
             m_cb(ec);
             return;
         }
@@ -137,6 +141,7 @@ void HttpDataTunnelClient::loop_run(boost::system::error_code ec)
         });
         if(ec)
         {
+            KK_PRT("session_id:%s, err:%s", m_session_id.c_str(), ec.message().c_str());
             m_cb(ec);
             return;
         }
@@ -148,6 +153,7 @@ void HttpDataTunnelClient::loop_run(boost::system::error_code ec)
         });
         if(ec)
         {
+            KK_PRT("session_id:%s, err:%s", m_session_id.c_str(), ec.message().c_str());
             m_cb(ec);
             return;
         }
@@ -185,6 +191,7 @@ void HttpDataTunnelClient::loop_run(boost::system::error_code ec)
                 }
                 if(ec)
                 {
+                    KK_PRT("session_id:%s, err:%s", m_session_id.c_str(), ec.message().c_str());
                     m_cb(ec);
                     return;
                 }
@@ -204,6 +211,7 @@ void HttpDataTunnelClient::loop_run(boost::system::error_code ec)
                 }
                 if(ec)
                 {
+                    KK_PRT("session_id:%s, err:%s", m_session_id.c_str(), ec.message().c_str());
                     m_cb(ec);
                     return;
                 }
@@ -217,6 +225,7 @@ void HttpDataTunnelClient::loop_run(boost::system::error_code ec)
         });
         if(ec)
         {
+            KK_PRT("session_id:%s, err:%s", m_session_id.c_str(), ec.message().c_str());
             m_cb(ec);
             return;
         }
@@ -255,6 +264,7 @@ void HttpDataTunnelClient::loop_run(boost::system::error_code ec)
                 }
                 if(ec)
                 {
+                    KK_PRT("session_id:%s, err:%s", m_session_id.c_str(), ec.message().c_str());
                     m_cb(ec);
                     return;
                 }
@@ -274,6 +284,7 @@ void HttpDataTunnelClient::loop_run(boost::system::error_code ec)
                 }
                 if(ec)
                 {
+                    KK_PRT("session_id:%s, err:%s", m_session_id.c_str(), ec.message().c_str());
                     m_cb(ec);
                     return;
                 }

@@ -181,7 +181,7 @@ void HttpDataTunnelServer::loop_session(BSErrorCode ec, TunnelSessionInfoPtr co_
             });
             if(ec)
             {
-                log_warning_ext("loop_session failed, %1%", ec.message());
+                log_warning_ext("loop_session failed, %1%,session_id:%2%", ec.message(),co_info->session_id);
                 return;
             }
             add_session(co_info);
@@ -299,7 +299,7 @@ void HttpDataTunnelServer::loop_transfer_data(BSErrorCode ec, TunnelSessionInfoP
                 }
                 if(ec)
                 {
-                    log_error_ext("loop_transfer_data failed, %1%", ec.message());
+                    log_error_ext("loop_transfer_data failed, %1%,session_id:%2%", ec.message(), co_info->session_id);
                     return;
                 }
                 {
@@ -318,7 +318,7 @@ void HttpDataTunnelServer::loop_transfer_data(BSErrorCode ec, TunnelSessionInfoP
                 }
                 if(ec)
                 {
-                    log_error_ext("loop_transfer_data failed, %1%", ec.message());
+                    log_error_ext("loop_transfer_data failed, %1%,session_id:%2%", ec.message(), co_info->session_id);
                     return;
                 }
             }
@@ -333,7 +333,7 @@ void HttpDataTunnelServer::loop_transfer_data(BSErrorCode ec, TunnelSessionInfoP
         });
         if(ec)
         {
-            log_warning_ext("loop_session failed, %1%", ec.message());
+            log_warning_ext("loop_session failed, %1%,session_id:%2%", ec.message(), co_info->session_id);
             return;
         }
         //转发http响应
@@ -351,6 +351,10 @@ void HttpDataTunnelServer::loop_transfer_data(BSErrorCode ec, TunnelSessionInfoP
                                         [co_info, this](const BSErrorCode& ec, std::size_t) {
                     this->loop_transfer_data(ec, co_info);
                 });
+                if(ec)
+                {
+                    log_error_ext("loop_transfer_data failed, %1%,session_id:%2%", ec.message(), co_info->session_id);
+                }
                 break;
             }
             else
@@ -371,7 +375,7 @@ void HttpDataTunnelServer::loop_transfer_data(BSErrorCode ec, TunnelSessionInfoP
                 }
                 if(ec)
                 {
-                    log_error_ext("loop_transfer_data failed, %1%", ec.message());
+                    log_error_ext("loop_transfer_data failed, %1%,session_id:%2%", ec.message(), co_info->session_id);
                     return;
                 }
                 {
@@ -390,7 +394,7 @@ void HttpDataTunnelServer::loop_transfer_data(BSErrorCode ec, TunnelSessionInfoP
                 }
                 if(ec)
                 {
-                    log_error_ext("loop_transfer_data failed, %1%", ec.message());
+                    log_error_ext("loop_transfer_data failed, %1%,session_id:%2%", ec.message(), co_info->session_id);
                     return;
                 }
             }

@@ -25,7 +25,10 @@ int main(int argc,char ** argv)
     IoContext ioc;
     HttpDataTunnelClientPtr ht(new HttpDataTunnelClient(ioc));
     ht->async_run(host, port, session_id, local_ip, local_port, [session_id](boost::system::error_code ec){
-        KK_PRT("session_id:%s, err:%s", session_id.c_str(), ec.message().c_str());
+        if(!ec)
+        {
+            KK_PRT("session_id:%s, err:%s", session_id.c_str(), ec.message().c_str());
+        }
     });
 
     ioc.run();
