@@ -1,5 +1,5 @@
-#ifndef HTTP_TUNNEL_CLIENT_H
-#define HTTP_TUNNEL_CLIENT_H
+#ifndef HTTP_DATA_TUNNEL_CLIENT_H
+#define HTTP_DATA_TUNNEL_CLIENT_H
 
 #define DATA_SESSION_ID "DATA-SID"
 
@@ -32,17 +32,6 @@ typedef http::response_serializer<http::buffer_body> ResSerializer;
 typedef std::function<void (boost::system::error_code ec)> RunCallback;
 class HttpDataTunnelClient;
 typedef std::shared_ptr<HttpDataTunnelClient> HttpDataTunnelClientPtr;
-
-
-#define KK_PRT(fmt...)   \
-    do {\
-    time_t timep;\
-    time(&timep);\
-    tm* tt = localtime(&timep); \
-    printf("[%d-%02d-%02d %02d:%02d:%02d][%s]-%d: ", tt->tm_year+1900,tt->tm_mon+1,tt->tm_mday,tt->tm_hour,tt->tm_min,tt->tm_sec, __FUNCTION__, __LINE__);\
-    printf(fmt);\
-    printf("\n");\
-    }while(0)
 
 class HttpDataTunnelClient : public std::enable_shared_from_this<HttpDataTunnelClient>
 {
@@ -88,4 +77,4 @@ private:
     vector<char> m_body_buffer;
 };
 
-#endif // HTTP_TUNNEL_CLIENT_H
+#endif // HTTP_DATA_TUNNEL_CLIENT_H

@@ -31,6 +31,8 @@ executable("http_data_tunnel_client") {
         "./client/main_http.cpp",
         "./client/http_data_tunnel_client.h",
         "./client/http_data_tunnel_client.cpp",
+        "./client/pub.h",
+        "./client/pub.cpp",
         ]
     libs = ["pthread"]
 }
