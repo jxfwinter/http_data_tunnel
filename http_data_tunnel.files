@@ -1,5 +1,5 @@
 .gitignore
-BUILD.gn
+CMakeLists.txt
 README.md
 client/http_data_tunnel_client.cpp
 client/http_data_tunnel_client.h
