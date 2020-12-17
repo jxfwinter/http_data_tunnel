@@ -1,5 +1,6 @@
 /bin
 /lib
 /out
+/build
 *.creator.user
 *~

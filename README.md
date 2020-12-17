@@ -23,5 +23,5 @@ http反向隧道数据传输中间件，主要用于http上传下载数据，比
 3 一个隧道建立，用于一次文件传输，传输完成后，自动关闭  
   
 构建命令  
-gn gen out/release --args="is_debug=false"  
-ninja -C out/release  
+cmake -S . -B build  
+cmake --build build -j 1 -v  
